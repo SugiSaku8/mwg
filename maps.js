@@ -3,6 +3,13 @@ const ctx = canvas.getContext('2d');
 
 // シード値
 let seed = Math.floor(Math.random() * 1000);
+const biomeTypes = {
+    grassland: "grassland",
+    desert: "desert",
+    forest: "forest",
+    mountain: "mountain",
+    ocean: "ocean"
+};
 
 // 色の生成関数
 Colors = {};
