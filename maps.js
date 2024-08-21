@@ -7,48 +7,46 @@ let seed = Math.floor(Math.random() * 1000);
 // 色の生成関数
 Colors = {};
 Colors.names = {
-    grassland: "#00FF00",
-    desert: "#EAECEE",
+    grassland: "#00C853",
+    desert: "#FDF5E6",
     forest: "#228B22",
     mountain: "#A9A9A9",
     ocean: "#0000FF"
 };
 
-Colors.random = function() {
-    var result;
-    var count = 0;
-    for (var prop in this.names)
-        if (Math.random() < 1/++count)
-           result = prop;
-    return { name: result, rgb: this.names[result]};
+Colors.biomeColors = {
+    grassland: ["#00C853", "#32CD32"],
+    desert: ["#FDF5E6", "#FFFACD"],
+    forest: ["#228B22", "#006400"],
+    mountain: ["#A9A9A9", "#808080"],
+    ocean: ["#0000FF", "#4169E1"]
 };
 
-Colors.generateVariations = function(baseColor, count) {
-    let variations = [];
-    for (let i = 0; i < count; i++) {
-        let hue = baseColor.hue + (Math.random() - 0.5) * 30;
-        let saturation = baseColor.saturation + (Math.random() - 0.5) * 30;
-        let lightness = baseColor.lightness + (Math.random() - 0.5) * 30;
-        variations.push({ hue: hue, saturation: saturation, lightness: lightness });
-    }
-    return variations.map(variation => {
-        return `hsl(${variation.hue}, ${variation.saturation}%, ${variation.lightness}%)`;
-    });
+Colors.random = function(range) {
+    var start = parseInt(range[0].slice(1), 16);
+    var end = parseInt(range[1].slice(1), 16);
+    var randomValue = Math.floor(Math.random() * (end - start + 1)) + start;
+    return '#' + ('000000' + randomValue.toString(16)).slice(-6);
 };
 
 // バイオームデータの生成
 function generateBiomes(seed) {
     let biomes = [];
+    let biomeWidths = [50, 70, 80, 60, 40];
+    let biomeHeights = [30, 45, 55, 35, 25];
     for (let i = 0; i < canvas.width; i++) {
         biomes[i] = [];
         for (let j = 0; j < canvas.height; j++) {
             let biomeType = Math.floor(Math.random() * 5);
-            let biomeColors = [];
-            for (let k = 0; k < 3; k++) {
-                let color = Colors.random();
-                biomeColors.push(color);
+            let startX = Math.floor(Math.random() * (canvas.width - biomeWidths[biomeType]));
+            let startY = Math.floor(Math.random() * (canvas.height - biomeHeights[biomeType]));
+            let colorRange = Colors.biomeColors[biomeTypes[biomeType]];
+            let color = Colors.random(colorRange);
+            for (let x = startX; x < startX + biomeWidths[biomeType]; x++) {
+                for (let y = startY; y < startY + biomeHeights[biomeType]; y++) {
+                    biomes[x][y] = { type: biomeType, color: color };
+                }
             }
-            biomes[i][j] = { type: biomeType, colors: biomeColors };
         }
     }
     return biomes;
@@ -59,10 +57,9 @@ function drawBiomes(biomes) {
     for (let x = 0; x < canvas.width; x++) {
         for (let y = 0; y < canvas.height; y++) {
             let biome = biomes[x][y];
-            for (let color of biome.colors) {
-                ctx.fillStyle = color.rgb;
-                ctx.fillRect(x, y, 10, 10);
-                y += 20;
+            if (biome) {
+                ctx.fillStyle = biome.color;
+                ctx.fillRect(x, y, 1, 1);
             }
         }
     }
